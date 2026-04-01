@@ -33,3 +33,14 @@ class Chat:
             'content': result
         })
         return result
+
+if __name__ == '__main__':
+    import readline
+    chat = Chat()
+    try:
+        while True:
+            user_input = input('chat> ')
+            response = chat.send_message(user_input)
+            print(response)
+    except KeyboardInterrupt:
+        print()
