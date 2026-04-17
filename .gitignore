@@ -1,7 +1,8 @@
 .env
-venv
+venv/
 __pycache__
-htmlcov
+.pytest_cache/
+htmlcov/
 .coverage
 dist/
 *.egg-info/
