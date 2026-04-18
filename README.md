@@ -5,6 +5,7 @@
 ![Flake8](https://github.com/avankomen25/LLM-Project/actions/workflows/flake8.yaml/badge.svg)
 [![codecov](https://codecov.io/github/avankomen25/LLM-Project/graph/badge.svg?token=K97YWXIYUX)](https://codecov.io/github/avankomen25/LLM-Project)
 ![PyPI](https://img.shields.io/pypi/v/cmc-csci040-andrewvankomen)
+
 [PyPI page](https://pypi.org/project/cmc-csci040-andrewvankomen/)
 
 A command-line AI chat tool that lets you have conversations with your codebase. Point it at any project and ask questions. It can read files, search for patterns, and list directories automatically.
