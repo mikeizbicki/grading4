@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cmc-csci040-andrewvankomen"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
     "groq",
     "openai",

@@ -24,7 +24,7 @@ TOOL_MAP = {
 }
 
 PROVIDER_MODELS = {
-    'groq': 'llama-3.1-8b-instant',
+    'groq': 'llama-3.3-70b-versatile',
     'openai': 'openai/gpt-4o',
     'anthropic': 'anthropic/claude-opus-4-6',
     'google': 'google/gemini-2.0-flash',
