@@ -1,5 +1,5 @@
 """Tool definition and implementation for reading file contents."""
-
+import os
 from tools.utils import is_path_safe
 
 
@@ -31,6 +31,8 @@ def cat(path):
     """
     if not is_path_safe(path):
         return 'Error: unsafe path'
+    if os.path.isdir(path):
+        return 'Error: path is a directory, not a file'
     try:
         with open(path, 'r', encoding='utf-8') as f:
             return f.read()

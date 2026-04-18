@@ -1,9 +1,12 @@
 """A REPL-based chat interface that supports tool use for file system operations."""
 
 import os   # noqa: F401
+import json
+import argparse
 
 from groq import Groq
 from dotenv import load_dotenv
+from openai import OpenAI
 
 from tools.calculate import calculate, tool_definition as calculate_def
 from tools.ls import ls, tool_definition as ls_def
@@ -20,6 +23,13 @@ TOOL_MAP = {
     'grep': grep,
 }
 
+PROVIDER_MODELS = {
+    'groq': 'llama-3.1-8b-instant',
+    'openai': 'openai/gpt-4o',
+    'anthropic': 'anthropic/claude-opus-4-6',
+    'google': 'google/gemini-2.0-flash',
+}
+
 
 class Chat:
     '''
@@ -29,7 +39,7 @@ class Chat:
 
     >>> chat = Chat()
     >>> chat.send_message('Hi, my name is Bob', temperature=0.0)
-    "Hello Bob, it's nice to meet you. I'm here to help with any questions or tasks you'd like to accomplish using the available functions. What would you like to do first?"
+    "Hello Bob, it's nice to meet you."
     >>> def monkey_input(prompt, user_inputs=['Hello, I am monkey.', 'Goodbye.']):
     ...     try:
     ...         user_input = user_inputs.pop(0)
@@ -41,22 +51,31 @@ class Chat:
     >>> builtins.input = monkey_input
     >>> repl(temperature=0.0)
     chat> Hello, I am monkey.
-    Hello monkey, it's nice to meet you. I can help you with some tasks using the available functions. What would you like to do?
+    Hello monkey, I'm here to help you with any questions you have about code. What would you like to know?
     chat> Goodbye.
-    It was nice chatting with you, monkey. Have a great day.
+    See you later monkey.
     <BLANKLINE>
     '''
-    client = Groq()
 
-    def __init__(self):
+    def __init__(self, provider='groq'):
+        """Initialize the chat client with the specified provider."""
+        if provider == 'groq':
+            self.client = Groq()
+        else:
+            self.client = OpenAI(
+                base_url='https://openrouter.ai/api/v1',
+                api_key=os.environ.get('OPENROUTER_API_KEY'),
+            )
+        self.model = PROVIDER_MODELS[provider]
         self.messages = [
             {
                 'role': 'system',
                 'content': (
-                    'Write the output in 1-2 sentences. '
-                    'You are a helpful assistant that can read files in the current directory. '
-                    'You ONLY have access to these four tools: calculate, ls, cat, grep. '
-                    'Do not use any other tools.'
+                    'You are a helpful assistant that answers questions about code. '
+                    'You MUST use the provided tools to answer questions, never say you cannot access files. '
+                    'When asked about files or directories, immediately call ls, cat, or grep. '
+                    'Do not describe what you will do, just do it. '
+                    'Keep responses to 1-2 sentences.'
                 )
             },
         ]
@@ -64,10 +83,11 @@ class Chat:
     def send_message(self, message, temperature=0.8):
         """Send a message and return the assistant response, handling tool calls if needed."""
         self.messages.append({'role': 'user', 'content': message})
+        self.messages = self.messages[:1] + self.messages[-10:]
         while True:
             chat_completion = self.client.chat.completions.create(
                 messages=self.messages,
-                model='llama-3.1-8b-instant',
+                model=self.model,
                 temperature=temperature,
                 tools=TOOLS,
                 tool_choice='auto',
@@ -77,7 +97,6 @@ class Chat:
                 self.messages.append(choice.message)
                 for tool_call in choice.message.tool_calls:
                     name = tool_call.function.name
-                    import json
                     args = json.loads(tool_call.function.arguments or '{}') or {}
                     result = TOOL_MAP[name](**args)
                     self.messages.append({
@@ -115,10 +134,10 @@ def run_slash_command(chat, user_input):
     return result
 
 
-def repl(temperature=0.8):
+def repl(temperature=0.8, provider='groq'):
     """Run the interactive chat REPL, supporting both messages and slash commands."""
     import readline  # noqa: F401
-    chat = Chat()
+    chat = Chat(provider=provider)
     try:
         while True:
             user_input = input('chat> ')
@@ -132,4 +151,7 @@ def repl(temperature=0.8):
 
 
 if __name__ == '__main__':
-    repl()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--provider', default='groq', choices=PROVIDER_MODELS.keys())
+    args = parser.parse_args()
+    repl(provider=args.provider)
