@@ -6,6 +6,8 @@
 [![codecov](https://codecov.io/github/avankomen25/LLM-Project/graph/badge.svg?token=K97YWXIYUX)](https://codecov.io/github/avankomen25/LLM-Project)
 ![PyPI](https://img.shields.io/pypi/v/cmc-csci040-andrewvankomen)
 
+![Demo](llmdemo.gif)
+
 A command-line chat application that uses the Groq API to have conversations with an LLM.
 
 [PyPI page](https://pypi.org/project/cmc-csci040-andrewvankomen/)
